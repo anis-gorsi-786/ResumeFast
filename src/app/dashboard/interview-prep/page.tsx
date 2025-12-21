@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,7 +16,7 @@ interface QuestionAnswer {
   tips: string[]
 }
 
-export default function InterviewPrepPage() {
+export default function InterviewPrepPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const coverLetterId = searchParams.get('coverLetterId')
@@ -343,5 +343,20 @@ export default function InterviewPrepPage() {
         )}
       </main>
     </div>
+  )
+}
+
+export default function InterviewPrepPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <InterviewPrepPageContent />
+    </Suspense>
   )
 }

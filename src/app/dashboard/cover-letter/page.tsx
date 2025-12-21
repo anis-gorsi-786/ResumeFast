@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense} from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -12,7 +12,7 @@ import { extractPersonalDetails } from '@/lib/openai/coverLetter'
 import { generatePDF, generateDOCX, downloadFile, generateFilename } from '@/lib/download/generators'
 import { ArrowLeft, Sparkles, Loader2, AlertCircle, FileText, Lightbulb } from 'lucide-react'
 
-export default function CoverLetterPage() {
+export default function CoverLetterPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const resumeId = searchParams.get('resumeId')
@@ -458,5 +458,20 @@ export default function CoverLetterPage() {
         )}
       </main>
     </div>
+  )
+}
+
+export default function CoverLetterPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <CoverLetterPageContent />
+    </Suspense>
   )
 }
