@@ -16,7 +16,7 @@ interface QuestionAnswer {
   tips: string[]
 }
 
-export default function InterviewPrepPageContent() {
+function InterviewPrepPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const coverLetterId = searchParams.get('coverLetterId')
