@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
       // For PDF files, use pdf-parse
       const pdfParse = await import('pdf-parse')
-      const pdfData = await pdfParse.default(buffer)
+      const pdfData = await (pdfParse as any).default(buffer)
       extractedText = pdfData.text
     } else {
       // For DOCX/DOC files, use mammoth
