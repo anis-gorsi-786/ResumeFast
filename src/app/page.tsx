@@ -5,7 +5,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <nav className="p-4 flex justify-between items-center max-w-7xl mx-auto">
-        <h1 className="text-2xl font-bold text-blue-600">ResumeFast</h1>
+        <h1 className="text-2xl font-bold text-blue-600">Applya</h1>
         <div className="space-x-4">
           <Link href="/login">
             <Button variant="ghost">Login</Button>

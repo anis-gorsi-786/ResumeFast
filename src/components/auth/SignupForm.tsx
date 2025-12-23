@@ -54,7 +54,7 @@ export default function SignupForm() {
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
         <CardTitle>Create Account</CardTitle>
-        <CardDescription>Sign up for ResumeFast</CardDescription>
+        <CardDescription>Sign up for Applya</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
