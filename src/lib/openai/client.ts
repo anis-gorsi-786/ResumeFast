@@ -50,6 +50,29 @@ CRITICAL INSTRUCTIONS:
 7. Ensure ATS compatibility (no graphics, simple formatting)
 8. Use action verbs and quantifiable achievements
 
+FORMATTING RULES - VERY IMPORTANT:
+- DO NOT use asterisks (*) for any formatting
+- DO NOT use markdown bold (**text**)
+- Use ALL CAPS for section headers
+- Use plain text only
+- Use bullet points with "•" or "-" characters
+- Keep formatting simple and ATS-compatible
+
+Example of GOOD formatting:
+PROFESSIONAL EXPERIENCE
+
+Senior Developer - Tech Corp
+- Led team of 5 engineers developing React applications
+- Improved performance by 40% through code optimization
+- Managed $2M budget for cloud infrastructure
+
+Example of BAD formatting (DO NOT DO THIS):
+**PROFESSIONAL EXPERIENCE**
+
+*Senior Developer* - Tech Corp
+- Led team of 5 engineers developing **React** applications
+- *Improved* performance by 40%
+
 KEYWORD OPTIMIZATION STRATEGY:
 - If a keyword relates to existing experience, highlight it prominently
 - If a skill is mentioned but not emphasized, bring it to the forefront
@@ -61,6 +84,7 @@ FORBIDDEN:
 - Do NOT add experiences or skills not present in the base resume
 - Do NOT fabricate dates, companies, or positions
 - Do NOT make claims that cannot be supported by the base resume
+- Do NOT use asterisks, markdown, or special formatting
 
 TARGET: Achieve 80%+ keyword match while maintaining resume authenticity.`
 

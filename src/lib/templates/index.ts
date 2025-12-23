@@ -28,6 +28,7 @@ export const templates: ResumeTemplate[] = [
       'Conservative industries',
       'ATS-heavy companies'
     ]
+    preview: '/templates/template-1-preview.png',
   },
   {
     id: 'template_2',
@@ -49,6 +50,7 @@ export const templates: ResumeTemplate[] = [
       'Design-conscious roles',
       'Portfolio-heavy careers'
     ]
+    preview: '/templates/template-2-preview.png',
   }
 ]
 
