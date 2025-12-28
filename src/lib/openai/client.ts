@@ -38,105 +38,108 @@ export async function generateCustomizedResume(
   const originalAtsScore = Math.round((originalMatchedKeywords.length / keywords.length) * 100)
 
   // Build locked sections instruction
-  let lockedSectionsInstruction = ''
-  if (lockedSections.length > 0) {
-    lockedSectionsInstruction = `\n\nCRITICAL - LOCKED SECTIONS:
-The following sections are LOCKED and must NOT be modified:
-${lockedSections.map(s => `- ${s}`).join('\n')}
+let lockedSectionsInstruction = ''
+if (lockedSections.length > 0) {
+  lockedSectionsInstruction = `\n\n━━━ CRITICAL - LOCKED SECTIONS - DO NOT MODIFY ━━━
+The following sections are LOCKED. You MUST copy them EXACTLY word-for-word from the base resume:
 
-For locked sections:
-- Keep the exact wording
-- Keep all dates, companies, titles exactly as written
-- DO NOT rewrite, rephrase, or reorganize
-- You may reorder locked sections relative to unlocked sections
-- You may emphasize locked sections by placing them prominently
+${lockedSections.map(s => `🔒 ${s}`).join('\n')}
 
-For UNLOCKED sections only:
-- Optimize wording for keywords
-- Rewrite for ATS compatibility
-- Add emphasis and achievements`
-  }
+RULES FOR LOCKED SECTIONS:
+✗ DO NOT change ANY words, phrases, or sentences
+✗ DO NOT rewrite, paraphrase, or "improve" the text
+✗ DO NOT modify dates, company names, job titles, or achievements
+✗ DO NOT add or remove bullet points
+✗ DO NOT change the order of content within the section
+✓ You MAY reorder where locked sections appear in the final resume
+✓ Copy the section EXACTLY as it appears in the BASE RESUME above
+
+RULES FOR UNLOCKED SECTIONS:
+✓ Optimize wording for keywords from job description
+✓ Rewrite for ATS compatibility
+✓ Add emphasis and quantified achievements
+✓ Incorporate missing keywords naturally
+
+VERIFICATION STEP (REQUIRED):
+Before returning the final resume, verify that each locked section appears EXACTLY as written in the base resume. If you changed even one word, you FAILED.`
+}
 
   // Build the prompt
 const systemPrompt = `You are an expert resume writer specializing in ATS-optimized resumes. 
 Your PRIMARY GOAL is to maximize keyword matching while maintaining truthfulness.
 
-TEMPLATE FORMAT - CRITICAL:
+TEMPLATE FORMAT - CRITICAL - MUST FOLLOW EXACTLY:
 ${template === 'template_1' ? `
-Use this exact structure (Template 1 - Clean Professional):
-
 FIRST NAME LAST NAME
-City, State | Phone: +XX XXXX XXX XXX | Email: email@email.com | LinkedIn: linkedin.com/in/username
+City, State | Phone: +61 XXX XXX XXX | Email: email@email.com | LinkedIn: linkedin.com/in/username
 
 PROFESSIONAL SUMMARY
-[2-3 sentences targeting the specific role and key achievements]
+[2-3 sentences maximum - focus on role relevance]
 
 EDUCATION
-[Degree] - [Field]
-University Name | Start Year - End Year
-- Key achievements or projects
+Bachelor of [Degree] ([Specialization])
+University Name | Year - Year
+- Achievement or relevant coursework
 
 PROFESSIONAL EXPERIENCE
 Job Title
-Company Name | Location | MM/YYYY - Present/End Date
-- Key responsibility or achievement (start with action verb)
-- Another key accomplishment (quantify when possible)
-- Example of impact or improvement
-- Additional relevant task or role
+Company Name | Location | Month YYYY - Present
+- Key responsibility starting with action verb
+- Quantified achievement with impact
+- Another relevant accomplishment
+- Technical implementation or improvement
 
 TECHNICAL SKILLS
-- Category: [Specific skills and tools]
-- Category: [Specific skills and tools]
+Category: Skill, Skill, Skill
+Category: Skill, Skill, Skill
 
 VOLUNTEERING & MEMBERSHIPS
-- Role - Organization Name | Year
+- Role - Organization | Year
 ` : `
-Use this exact structure (Template 2 - Modern Executive):
-
 FIRST NAME LAST NAME
-City, State | Phone: +XX XXXX XXX XXX | Email: email@email.com | LinkedIn: linkedin.com/in/username
+City, State | Phone: +61 XXX XXX XXX | Email: email@email.com | LinkedIn: linkedin.com/in/username
 
 PROFESSIONAL PROFILE
-[2-3 sentences showing dedication and key strengths relevant to target role]
+[2-3 sentences showing dedication and expertise relevant to the role]
 
 KEY CAPABILITIES
-- Skill or area of expertise: Brief explanation of strength or capability
-- Another skill: Brief explanation of proficiency
-- Problem-solving area: Summary of excellence area
-- Customer/stakeholder focus: Approach to outcomes
+- Skill area: Brief explanation of capability and strength
+- Technical expertise: Description of proficiency
+- Problem-solving: Summary of approach and results
+- Stakeholder management: How you deliver outcomes
 
 CAREER SUMMARY
 (Job Title) - Company Name | Location | Year - Year
 
 QUALIFICATION
-- Bachelor Degree (or Certification)
+- Degree Name
 
 PROFESSIONAL DEVELOPMENT
-- [Certification / Training] | Issuing Organization | Year
+- Certification Name | Organization | Year
 
 RECENT PROFESSIONAL EXPERIENCE
 (Job Title)
 Company Name | Location | Month YYYY - Present
-- Key responsibility: Primary duty description
-- Special achievement: Highlighting example of success or impact
-- Problem solving: Resolving issue or implementing improvement
-- Process improvement: Success in efficiency or procedure
-- Clear & effective communication: Interacting with clients or colleagues
-- Technical expertise: Demonstrating specific skills relevant to role
+- Comprehensive responsibility: Detailed description of primary duty
+- Achievement with context: Specific example of success and its impact
+- Problem resolution: How you addressed challenges or implemented solutions
+- Process improvement: Efficiency gain or workflow enhancement
+- Stakeholder communication: How you interact with clients or team members
+- Technical competency: Demonstration of relevant technical skills
 
 REFERENCES
 Available upon request
 `}
 
-FORMATTING RULES - VERY IMPORTANT:
-- DO NOT use asterisks (*) for any formatting
-- DO NOT use markdown bold (**text**)
-- Use ALL CAPS for section headers exactly as shown in template
-- Use plain text only
-- Use bullet points with "•" character
-- Keep exact section names from template
-- Follow template structure precisely
-- Use proper spacing between sections
+CRITICAL FORMATTING REQUIREMENTS:
+1. Headers MUST be ALL CAPS with no other formatting
+2. NO asterisks (*), NO markdown (**), NO special characters
+3. Bullet points use "•" character ONLY
+4. Each section MUST appear in order shown above
+5. Job titles in parentheses for Template 2: (Service Desk Officer)
+6. Dates format: Month YYYY - Present OR Month YYYY - Month YYYY
+7. Keep exact spacing: blank line between sections
+8. Contact line uses " | " (space pipe space) as separator
 
 ${lockedSectionsInstruction}
 

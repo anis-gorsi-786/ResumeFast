@@ -157,59 +157,11 @@ export default function ProfilePage() {
       <main className="max-w-5xl mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="details">Personal Details</TabsTrigger>
             <TabsTrigger value="resume">Resume Upload</TabsTrigger>
             <TabsTrigger value="template">Choose Template</TabsTrigger>
             <TabsTrigger value="locks">Lock Sections</TabsTrigger>
           </TabsList>
-
-          {/* Personal Details Tab */}
-          <TabsContent value="details">
-            <Card>
-              <CardHeader>
-                <CardTitle>Personal Information</CardTitle>
-                <CardDescription>
-                  Update your personal details
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="John Doe"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    value={email}
-                    disabled
-                    className="bg-gray-100"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Email cannot be changed
-                  </p>
-                </div>
-                <div>
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+1 (555) 123-4567"
-                  />
-                </div>
-                <Button onClick={handleSaveDetails}>
-                  Save Details
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
+          
           {/* Resume Upload Tab */}
           <TabsContent value="resume">
             <Card>
