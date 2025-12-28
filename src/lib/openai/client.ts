@@ -13,6 +13,7 @@ export interface GenerateResumeParams {
   jobDescription: string
   customRequests?: string
   template: string
+  lockedSections?: string[]
 }
 
 export interface GeneratedResume {
@@ -27,7 +28,7 @@ export interface GeneratedResume {
 export async function generateCustomizedResume(
   params: GenerateResumeParams
 ): Promise<GeneratedResume> {
-  const { baseResume, jobDescription, customRequests, template } = params
+  const { baseResume, jobDescription, customRequests, template, lockedSections = [] } = params
 
   // Extract keywords from job description
   const keywords = await extractKeywords(jobDescription)
@@ -36,57 +37,124 @@ export async function generateCustomizedResume(
   const originalMatchedKeywords = calculateKeywordMatch(baseResume, keywords)
   const originalAtsScore = Math.round((originalMatchedKeywords.length / keywords.length) * 100)
 
+  // Build locked sections instruction
+  let lockedSectionsInstruction = ''
+  if (lockedSections.length > 0) {
+    lockedSectionsInstruction = `\n\nCRITICAL - LOCKED SECTIONS:
+The following sections are LOCKED and must NOT be modified:
+${lockedSections.map(s => `- ${s}`).join('\n')}
+
+For locked sections:
+- Keep the exact wording
+- Keep all dates, companies, titles exactly as written
+- DO NOT rewrite, rephrase, or reorganize
+- You may reorder locked sections relative to unlocked sections
+- You may emphasize locked sections by placing them prominently
+
+For UNLOCKED sections only:
+- Optimize wording for keywords
+- Rewrite for ATS compatibility
+- Add emphasis and achievements`
+  }
+
   // Build the prompt
-  const systemPrompt = `You are an expert resume writer specializing in ATS-optimized resumes. 
+const systemPrompt = `You are an expert resume writer specializing in ATS-optimized resumes. 
 Your PRIMARY GOAL is to maximize keyword matching while maintaining truthfulness.
 
-CRITICAL INSTRUCTIONS:
-1. MUST incorporate ALL provided keywords naturally into the resume where relevant
-2. Reword existing achievements to include target keywords
-3. Emphasize experiences that align with required skills
-4. Use exact terminology from the job description
-5. Include keyword variations and synonyms
-6. Maintain all factual accuracy - never fabricate
-7. Ensure ATS compatibility (no graphics, simple formatting)
-8. Use action verbs and quantifiable achievements
+TEMPLATE FORMAT - CRITICAL:
+${template === 'template_1' ? `
+Use this exact structure (Template 1 - Clean Professional):
+
+FIRST NAME LAST NAME
+City, State | Phone: +XX XXXX XXX XXX | Email: email@email.com | LinkedIn: linkedin.com/in/username
+
+PROFESSIONAL SUMMARY
+[2-3 sentences targeting the specific role and key achievements]
+
+EDUCATION
+[Degree] - [Field]
+University Name | Start Year - End Year
+- Key achievements or projects
+
+PROFESSIONAL EXPERIENCE
+Job Title
+Company Name | Location | MM/YYYY - Present/End Date
+- Key responsibility or achievement (start with action verb)
+- Another key accomplishment (quantify when possible)
+- Example of impact or improvement
+- Additional relevant task or role
+
+TECHNICAL SKILLS
+- Category: [Specific skills and tools]
+- Category: [Specific skills and tools]
+
+VOLUNTEERING & MEMBERSHIPS
+- Role - Organization Name | Year
+` : `
+Use this exact structure (Template 2 - Modern Executive):
+
+FIRST NAME LAST NAME
+City, State | Phone: +XX XXXX XXX XXX | Email: email@email.com | LinkedIn: linkedin.com/in/username
+
+PROFESSIONAL PROFILE
+[2-3 sentences showing dedication and key strengths relevant to target role]
+
+KEY CAPABILITIES
+- Skill or area of expertise: Brief explanation of strength or capability
+- Another skill: Brief explanation of proficiency
+- Problem-solving area: Summary of excellence area
+- Customer/stakeholder focus: Approach to outcomes
+
+CAREER SUMMARY
+(Job Title) - Company Name | Location | Year - Year
+
+QUALIFICATION
+- Bachelor Degree (or Certification)
+
+PROFESSIONAL DEVELOPMENT
+- [Certification / Training] | Issuing Organization | Year
+
+RECENT PROFESSIONAL EXPERIENCE
+(Job Title)
+Company Name | Location | Month YYYY - Present
+- Key responsibility: Primary duty description
+- Special achievement: Highlighting example of success or impact
+- Problem solving: Resolving issue or implementing improvement
+- Process improvement: Success in efficiency or procedure
+- Clear & effective communication: Interacting with clients or colleagues
+- Technical expertise: Demonstrating specific skills relevant to role
+
+REFERENCES
+Available upon request
+`}
 
 FORMATTING RULES - VERY IMPORTANT:
 - DO NOT use asterisks (*) for any formatting
 - DO NOT use markdown bold (**text**)
-- Use ALL CAPS for section headers
+- Use ALL CAPS for section headers exactly as shown in template
 - Use plain text only
-- Use bullet points with "•" or "-" characters
-- Keep formatting simple and ATS-compatible
+- Use bullet points with "•" character
+- Keep exact section names from template
+- Follow template structure precisely
+- Use proper spacing between sections
 
-Example of GOOD formatting:
-PROFESSIONAL EXPERIENCE
+${lockedSectionsInstruction}
 
-Senior Developer - Tech Corp
-- Led team of 5 engineers developing React applications
-- Improved performance by 40% through code optimization
-- Managed $2M budget for cloud infrastructure
-
-Example of BAD formatting (DO NOT DO THIS):
-**PROFESSIONAL EXPERIENCE**
-
-*Senior Developer* - Tech Corp
-- Led team of 5 engineers developing **React** applications
-- *Improved* performance by 40%
-
-KEYWORD OPTIMIZATION STRATEGY:
-- If a keyword relates to existing experience, highlight it prominently
-- If a skill is mentioned but not emphasized, bring it to the forefront
-- Use keywords in context within achievement statements
-- Include keywords in the professional summary
-- Match technical terminology exactly as stated in job description
+KEYWORD OPTIMIZATION STRATEGY (for unlocked sections only):
+- Incorporate ALL missing keywords naturally
+- Reword achievements to include target keywords
+- Use exact terminology from job description
+- Include keyword variations
+- Emphasize relevant experiences
 
 FORBIDDEN:
-- Do NOT add experiences or skills not present in the base resume
-- Do NOT fabricate dates, companies, or positions
-- Do NOT make claims that cannot be supported by the base resume
+- Do NOT deviate from template structure
+- Do NOT add or remove sections from template
 - Do NOT use asterisks, markdown, or special formatting
+- Do NOT modify locked sections
+- Do NOT fabricate information
 
-TARGET: Achieve 80%+ keyword match while maintaining resume authenticity.`
+TARGET: Achieve 80%+ keyword match while maintaining resume authenticity and following template structure exactly.`
 
   const userPrompt = `BASE RESUME:
 ${baseResume}
