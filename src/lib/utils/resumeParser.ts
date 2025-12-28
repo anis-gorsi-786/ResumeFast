@@ -43,8 +43,8 @@ export function parseResumeSections(resumeText: string): ResumeSection[] {
     }
   })
   
-  // Save last section
-  if (currentSection) {
+  // Save last section with type assertion
+  if (currentSection !== null) {
     currentSection.endLine = lines.length - 1
     sections.push(currentSection)
   }
