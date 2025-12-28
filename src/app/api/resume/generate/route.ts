@@ -40,13 +40,30 @@ export async function POST(request: Request) {
       )
     }
 
+    // Get user preferences including locked sections
+const { data: prefs } = await supabase
+  .from('user_preferences')
+  .select('resume_text, selected_template, locked_sections')
+  .eq('user_id', user.id)
+  .single()
+
+if (!prefs || !prefs.resume_text) {
+  return NextResponse.json(
+    { error: 'Please upload your resume first' },
+    { status: 400 }
+  )
+}
+
+const lockedSections = (prefs.locked_sections || []) as string[]
+
     // Generate customized resume
     const result = await generateCustomizedResume({
-      baseResume: prefs.resume_text,
-      jobDescription,
-      customRequests,
-      template: prefs.selected_template || 'template_1',
-    })
+  baseResume: prefs.resume_text,
+  jobDescription,
+  customRequests,
+  template: prefs.selected_template || 'template_1',
+  lockedSections, // PASS LOCKED SECTIONS
+})
 
     // Save to database
     const { data: savedResume, error: saveError } = await supabase
