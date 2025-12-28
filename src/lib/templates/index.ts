@@ -2,55 +2,45 @@ export interface ResumeTemplate {
   id: string
   name: string
   description: string
-  preview: string
   features: string[]
   bestFor: string[]
+  preview: string
 }
 
 export const templates: ResumeTemplate[] = [
   {
     id: 'template_1',
     name: 'Clean Professional',
-    description: 'Single-column ATS-optimized format with clear section headers',
-    preview: '/templates/template-1-preview.png', // We'll add this image later
+    description: 'Classic, ATS-friendly format perfect for corporate roles',
     features: [
-      'Single column layout (maximum ATS compatibility)',
-      'ALL CAPS section headers',
-      'Bullet points for achievements',
-      'Clean, readable fonts',
-      'No tables or graphics',
-      'Right-aligned dates'
+      'Single-column layout',
+      'Clean typography',
+      'Maximum ATS compatibility',
+      'Professional appearance'
     ],
     bestFor: [
-      'IT & Technical roles',
-      'Corporate positions',
-      'Government applications',
-      'Conservative industries',
+      'Entry to mid-level positions',
+      'Corporate environments',
       'ATS-heavy companies'
     ],
-    preview: '/templates/template-1-preview.png',
+    preview: '/templates/template-1-preview.png'
   },
   {
     id: 'template_2',
     name: 'Modern Executive',
-    description: 'Professional two-column format with visual hierarchy',
-    preview: '/templates/template-2-preview.png', // Will add tomorrow
+    description: 'Bold, modern design for senior positions',
     features: [
       'Two-column layout',
-      'Skills sidebar',
-      'Modern typography',
-      'Visual section dividers',
       'Professional color accents',
-      'Compact yet readable'
+      'Skills bar visualization',
+      'Modern typography'
     ],
     bestFor: [
-      'Creative industries',
-      'Startups & tech companies',
       'Senior positions',
-      'Design-conscious roles',
-      'Portfolio-heavy careers'
+      'Creative industries',
+      'Stand-out applications'
     ],
-    preview: '/templates/template-2-preview.png',
+    preview: '/templates/template-2-preview.png'
   }
 ]
 
