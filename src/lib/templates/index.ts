@@ -27,7 +27,7 @@ export const templates: ResumeTemplate[] = [
       'Government applications',
       'Conservative industries',
       'ATS-heavy companies'
-    ]
+    ],
     preview: '/templates/template-1-preview.png',
   },
   {
@@ -49,7 +49,7 @@ export const templates: ResumeTemplate[] = [
       'Senior positions',
       'Design-conscious roles',
       'Portfolio-heavy careers'
-    ]
+    ],
     preview: '/templates/template-2-preview.png',
   }
 ]
