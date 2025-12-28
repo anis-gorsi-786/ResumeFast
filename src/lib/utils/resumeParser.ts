@@ -25,7 +25,7 @@ export function parseResumeSections(resumeText: string): ResumeSection[] {
     
     if (isHeader) {
       // Save previous section
-      if (currentSection) {
+      if (currentSection !== null) {
         currentSection.endLine = index - 1
         sections.push(currentSection)
       }
@@ -37,16 +37,17 @@ export function parseResumeSections(resumeText: string): ResumeSection[] {
         startLine: index,
         endLine: index,
       }
-    } else if (currentSection) {
+    } else if (currentSection !== null) {
       // Add to current section
       currentSection.content += line + '\n'
     }
   })
   
-  // Save last section with type assertion
+  // Save last section
   if (currentSection !== null) {
-    currentSection.endLine = lines.length - 1
-    sections.push(currentSection)
+    const finalSection = currentSection // Create a const to help TypeScript
+    finalSection.endLine = lines.length - 1
+    sections.push(finalSection)
   }
   
   return sections
