@@ -12,7 +12,7 @@ import { extractPersonalDetails } from '@/lib/openai/coverLetter'
 import { generatePDF, generateDOCX, downloadFile, generateFilename } from '@/lib/download/generators'
 import { ArrowLeft, Sparkles, Loader2, AlertCircle, FileText, Lightbulb } from 'lucide-react'
 
-<tt></tt>function CoverLetterPageContent() {
+function CoverLetterPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const resumeId = searchParams.get('resumeId')
