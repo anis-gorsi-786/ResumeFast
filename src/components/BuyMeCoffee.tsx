@@ -40,11 +40,11 @@ export function BuyMeCoffee() {
       </div>
 
       
-        href="https://buymeacoffee.com/applya.io"
+    <a href="https://buymeacoffee.com/applya.io"
         target="_blank"
         rel="noopener noreferrer"
-        className="block mb-2"
-      >
+        className="block mb-2">
+          
         <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-white">
           <Coffee className="h-4 w-4 mr-2" />
           Buy Me a Coffee
