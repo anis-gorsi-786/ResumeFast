@@ -1,42 +1,36 @@
 'use client'
 
 import { useState } from 'react'
+import { MessageSquare, Lightbulb, Rocket, Send, CheckCircle, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { ArrowLeft, Send, Loader2, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 
+type FeedbackType = 'feedback' | 'improvement' | 'idea'
+
 export default function FeedbackPage() {
-  const [feedbackType, setFeedbackType] = useState<'feedback' | 'improvement' | 'idea'>('feedback')
+  const [feedbackType, setFeedbackType] = useState<FeedbackType>('feedback')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    if (!message.trim()) {
-      setError('Please provide your feedback')
-      return
-    }
-
-    setSubmitting(true)
+    setIsSubmitting(true)
     setError('')
 
     try {
       const response = await fetch('/api/feedback/submit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           feedbackType,
-          name: name || 'Anonymous',
-          email: email || 'Not provided',
+          name,
+          email,
           message,
         }),
       })
@@ -44,179 +38,187 @@ export default function FeedbackPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit feedback')
+        // Extract error message from response
+        throw new Error(data.error || data.message || 'Failed to submit feedback')
       }
 
-      setSubmitted(true)
-      setName('')
-      setEmail('')
-      setMessage('')
+      setIsSuccess(true)
       
-      // Reset after 3 seconds
+      // Reset form
       setTimeout(() => {
-        setSubmitted(false)
+        setName('')
+        setEmail('')
+        setMessage('')
+        setFeedbackType('feedback')
+        setIsSuccess(false)
       }, 3000)
+      
     } catch (err: any) {
-      setError(err.message || 'Failed to submit feedback')
+      console.error('Feedback error:', err)
+      setError(err.message || 'Failed to submit feedback. Please try again.')
     } finally {
-      setSubmitting(false)
+      setIsSubmitting(false)
     }
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow">
-        <div className="max-w-4xl mx-auto px-4 py-4">
+  if (isSuccess) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+          <div className="mb-6">
+            <CheckCircle className="h-16 w-16 text-green-500 mx-auto animate-bounce" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Thank You!</h2>
+          <p className="text-gray-600 mb-6">
+            Your feedback has been submitted successfully. We'll review it soon!
+          </p>
           <Link href="/">
-            <Button variant="ghost" size="sm">
+            <Button className="w-full">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Home
             </Button>
           </Link>
         </div>
-      </nav>
+      </div>
+    )
+  }
 
-      <main className="max-w-2xl mx-auto px-4 py-12">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Share Your Feedback</CardTitle>
-            <CardDescription>
-              Help us make Applya better for everyone
-            </CardDescription>
-          </CardHeader>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Share Your Feedback</h1>
+          <p className="text-gray-600">Help us make Applya better for everyone</p>
+        </div>
 
-          <CardContent>
-            {submitted ? (
-              <div className="text-center py-12">
-                <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Thank You!
-                </h3>
-                <p className="text-gray-600">
-                  Your feedback has been sent successfully.
-                </p>
-              </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Feedback Type Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              What would you like to share?
+            </label>
+            <div className="grid grid-cols-3 gap-4">
+              <button
+                type="button"
+                onClick={() => setFeedbackType('feedback')}
+                className={`p-4 border-2 rounded-lg transition-all ${
+                  feedbackType === 'feedback'
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <MessageSquare className="h-8 w-8 mx-auto mb-2 text-blue-500" />
+                <span className="block text-sm font-medium">Feedback</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFeedbackType('improvement')}
+                className={`p-4 border-2 rounded-lg transition-all ${
+                  feedbackType === 'improvement'
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <Rocket className="h-8 w-8 mx-auto mb-2 text-orange-500" />
+                <span className="block text-sm font-medium">Improvement</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFeedbackType('idea')}
+                className={`p-4 border-2 rounded-lg transition-all ${
+                  feedbackType === 'idea'
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <Lightbulb className="h-8 w-8 mx-auto mb-2 text-yellow-500" />
+                <span className="block text-sm font-medium">New Idea</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Name Field */}
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+              Your Name (Optional)
+            </label>
+            <input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="John Doe"
+            />
+          </div>
+
+          {/* Email Field */}
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              Your Email (Optional)
+            </label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="john@example.com"
+            />
+            <p className="text-xs text-gray-500 mt-1">We'll only use this if we need to follow up</p>
+          </div>
+
+          {/* Message Field */}
+          <div>
+            <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+              Your Message *
+            </label>
+            <textarea
+              id="message"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              required
+              rows={6}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Tell us what's on your mind..."
+            />
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            disabled={isSubmitting || !message.trim()}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3"
+          >
+            {isSubmitting ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                Sending...
+              </>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Feedback Type */}
-                <div>
-                  <Label className="mb-3 block">What would you like to share?</Label>
-                  <div className="grid grid-cols-3 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setFeedbackType('feedback')}
-                      className={`p-3 rounded-lg border-2 transition-all ${
-                        feedbackType === 'feedback'
-                          ? 'border-blue-600 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="text-center">
-                        <div className="text-2xl mb-1">💬</div>
-                        <div className="text-sm font-medium">Feedback</div>
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setFeedbackType('improvement')}
-                      className={`p-3 rounded-lg border-2 transition-all ${
-                        feedbackType === 'improvement'
-                          ? 'border-blue-600 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="text-center">
-                        <div className="text-2xl mb-1">🚀</div>
-                        <div className="text-sm font-medium">Improvement</div>
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setFeedbackType('idea')}
-                      className={`p-3 rounded-lg border-2 transition-all ${
-                        feedbackType === 'idea'
-                          ? 'border-blue-600 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="text-center">
-                        <div className="text-2xl mb-1">💡</div>
-                        <div className="text-sm font-medium">New Idea</div>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Name */}
-                <div>
-                  <Label htmlFor="name">Your Name (Optional)</Label>
-                  <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="John Doe"
-                  />
-                </div>
-
-                {/* Email */}
-                <div>
-                  <Label htmlFor="email">Your Email (Optional)</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="john@example.com"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    We'll only use this if we need to follow up
-                  </p>
-                </div>
-
-                {/* Message */}
-                <div>
-                  <Label htmlFor="message">Your Message *</Label>
-                  <Textarea
-                    id="message"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Tell us what you think..."
-                    className="min-h-[150px]"
-                    required
-                  />
-                </div>
-
-                {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                    {error}
-                  </div>
-                )}
-
-                <Button
-                  type="submit"
-                  disabled={submitting}
-                  size="lg"
-                  className="w-full"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="h-4 w-4 mr-2" />
-                      Send Feedback
-                    </>
-                  )}
-                </Button>
-              </form>
+              <>
+                <Send className="h-4 w-4 mr-2" />
+                Send Feedback
+              </>
             )}
-          </CardContent>
-        </Card>
-      </main>
+          </Button>
+        </form>
+
+        <div className="mt-6 text-center">
+          <Link href="/" className="text-sm text-gray-600 hover:text-gray-900">
+            ← Back to Home
+          </Link>
+        </div>
+      </div>
     </div>
   )
 }
