@@ -39,17 +39,19 @@ export function FeedbackWidget() {
         </div>
       </div>
 
-      <div className="space-y-2">
-        <a href="/feedback">
-          <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Send Feedback
-          </Button>
-        </a>
-        <p className="text-xs text-gray-500 text-center">
-          Bug reports, ideas, or suggestions welcome!
-        </p>
-      </div>
+      
+     <a href="/feedback"
+        className="block mb-2"
+      >
+        <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+          <MessageSquare className="h-4 w-4 mr-2" />
+          Send Feedback
+        </Button>
+      </a>
+
+      <p className="text-xs text-gray-500 text-center">
+        Bug reports, ideas, or suggestions welcome!
+      </p>
     </div>
   )
 }
