@@ -86,6 +86,8 @@ CRITICAL RULES:
 6. Headers are already in ALL CAPS (keep them)
 7. If base resume has more jobs than template slots, include the most relevant ones
 8. If base resume has fewer items, leave those placeholder sections out
+9. SKIP ENTIRE SECTIONS if there's no data (e.g., if no certifications, remove PROFESSIONAL DEVELOPMENT section completely)
+10. DO NOT use "TBD" or placeholders - if data doesn't exist, omit the section
 
 ${lockedSectionsInstruction}
 

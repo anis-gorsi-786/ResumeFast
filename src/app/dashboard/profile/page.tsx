@@ -4,11 +4,9 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { createClient } from '@/lib/supabase/client'
-import { ArrowLeft, Upload, Check, Loader2 } from 'lucide-react'
+import { ArrowLeft, Upload, Check, Loader2, Eye, EyeOff, Calendar, FileText } from 'lucide-react'
 import { SectionLock } from '@/components/profile/SectionLock'
 
 export default function ProfilePage() {
@@ -16,15 +14,13 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('resume')
   const [loading, setLoading] = useState(true)
   
-  // Personal details
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
-  
   // Resume
   const [resumeText, setResumeText] = useState('')
   const [resumeUploaded, setResumeUploaded] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [uploadedAt, setUploadedAt] = useState<string>('')
+  const [fileName, setFileName] = useState<string>('')
+  const [expandedPreview, setExpandedPreview] = useState(false)
   
   // Template
   const [selectedTemplate, setSelectedTemplate] = useState('template_1')
@@ -43,9 +39,6 @@ export default function ProfilePage() {
         return
       }
 
-      // Set email from auth
-      setEmail(user.email || '')
-
       // Load preferences
       const { data } = await supabase
         .from('user_preferences')
@@ -54,46 +47,31 @@ export default function ProfilePage() {
         .single()
 
       if (data) {
-        setName(data.name || '')
-        setPhone(data.phone || '')
         setResumeText(data.resume_text || '')
         setResumeUploaded(data.resume_uploaded || false)
         setSelectedTemplate(data.selected_template || 'template_1')
+        setUploadedAt(data.updated_at || '')
+      }
+
+      // Get most recent upload for filename
+      if (data?.resume_uploaded) {
+        const { data: uploadData } = await supabase
+          .from('resume_uploads')
+          .select('file_name, created_at')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single()
+
+        if (uploadData) {
+          setFileName(uploadData.file_name)
+          setUploadedAt(uploadData.created_at)
+        }
       }
     } catch (err) {
       console.error('Error loading profile:', err)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleSaveDetails = async () => {
-    try {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (!user) return
-
-      const { error } = await supabase
-        .from('user_preferences')
-        .upsert(
-          {
-            user_id: user.id,
-            name,
-            phone,
-            updated_at: new Date().toISOString(),
-          },
-          {
-            onConflict: 'user_id',
-          }
-        )
-
-      if (error) throw error
-
-      alert('Details saved successfully!')
-    } catch (error) {
-      console.error('Error saving details:', error)
-      alert('Failed to save details')
     }
   }
 
@@ -119,7 +97,7 @@ export default function ProfilePage() {
       }
 
       setResumeUploaded(true)
-      setResumeText(data.preview || '')
+      setFileName(file.name)
       alert('Resume uploaded successfully!')
       
       // Reload profile to get updated data
@@ -156,7 +134,7 @@ export default function ProfilePage() {
 
       <main className="max-w-5xl mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="resume">Resume Upload</TabsTrigger>
             <TabsTrigger value="template">Choose Template</TabsTrigger>
             <TabsTrigger value="locks">Lock Sections</TabsTrigger>
@@ -173,9 +151,31 @@ export default function ProfilePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {resumeUploaded && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-2">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-green-800">Resume uploaded successfully</span>
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Check className="h-5 w-5 text-green-600" />
+                      <span className="text-green-800 font-medium">Resume uploaded successfully</span>
+                    </div>
+                    <div className="ml-7 space-y-1 text-sm text-green-700">
+                      {fileName && (
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          <span>File: {fileName}</span>
+                        </div>
+                      )}
+                      {uploadedAt && (
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4" />
+                          <span>Uploaded: {new Date(uploadedAt).toLocaleDateString('en-US', { 
+                            month: 'long', 
+                            day: 'numeric', 
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
 
@@ -215,12 +215,74 @@ export default function ProfilePage() {
                 </div>
 
                 {resumeText && (
-                  <div className="mt-4">
-                    <h4 className="font-semibold mb-2">Preview:</h4>
-                    <div className="bg-gray-50 p-4 rounded border max-h-40 overflow-y-auto">
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                        {resumeText.substring(0, 500)}...
+                  <div className="border rounded-lg overflow-hidden">
+                    <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-b">
+                      <h4 className="font-medium text-gray-900">Extracted Text Preview</h4>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setExpandedPreview(!expandedPreview)}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        {expandedPreview ? (
+                          <>
+                            <EyeOff className="h-4 w-4 mr-2" />
+                            Collapse
+                          </>
+                        ) : (
+                          <>
+                            <Eye className="h-4 w-4 mr-2" />
+                            Expand Full Text
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                    
+                    <div className={`p-4 bg-white ${expandedPreview ? 'max-h-96 overflow-y-auto' : 'max-h-32 overflow-hidden'}`}>
+                      <p className="text-sm text-gray-600 whitespace-pre-wrap font-mono">
+                        {expandedPreview ? resumeText : resumeText.substring(0, 500) + '...'}
                       </p>
+                    </div>
+                    
+                    {!expandedPreview && (
+                      <div className="bg-gradient-to-t from-white to-transparent h-8 -mt-8 relative pointer-events-none" />
+                    )}
+
+                    <div className="bg-gray-50 px-4 py-2 border-t">
+                      <p className="text-xs text-gray-500">
+                        Characters extracted: <strong>{resumeText.length.toLocaleString()}</strong>
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {resumeUploaded && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="font-medium text-blue-900 mb-2">✅ What's Next?</h4>
+                    <p className="text-sm text-blue-800 mb-3">
+                      Your resume has been saved! Now you can:
+                    </p>
+                    <div className="space-y-2">
+                      <Button 
+                        variant="outline"
+                        className="w-full justify-start border-blue-300 hover:bg-blue-100"
+                        onClick={() => setActiveTab('template')}
+                      >
+                        1. Choose a Template
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        className="w-full justify-start border-blue-300 hover:bg-blue-100"
+                        onClick={() => setActiveTab('locks')}
+                      >
+                        2. Lock Sections (Optional)
+                      </Button>
+                      <Button 
+                        className="w-full"
+                        onClick={() => router.push('/dashboard/generate')}
+                      >
+                        3. Generate Resume for a Job
+                      </Button>
                     </div>
                   </div>
                 )}

@@ -10,6 +10,7 @@ interface ResumeData {
 
 /**
  * Generate PDF from resume text
+ * Using Helvetica (closest to Calibri in jsPDF) with all black text
  */
 export async function generatePDF(data: ResumeData): Promise<Blob> {
   const { content, template } = data
@@ -20,12 +21,16 @@ export async function generatePDF(data: ResumeData): Promise<Blob> {
     format: 'a4',
   })
 
-  // Template-specific colors
-  const colors = template === 'template_1' 
-    ? { primary: [25, 55, 109], secondary: [80, 80, 80], text: [0, 0, 0] }      // Navy blue
-    : { primary: [41, 128, 185], secondary: [52, 73, 94], text: [0, 0, 0] }    // Modern blue
-
+  // Use Helvetica (closest to Calibri available in jsPDF)
   pdf.setFont('helvetica')
+
+  // All text should be BLACK
+  const colors = {
+    primary: [0, 0, 0],      // Black for headers
+    secondary: [0, 0, 0],    // Black for subheaders  
+    text: [0, 0, 0],         // Black for text
+    link: [0, 0, 255]        // Blue for hyperlinks (if any)
+  }
 
   const lines = content.split('\n')
   let y = 20
@@ -51,7 +56,7 @@ export async function generatePDF(data: ResumeData): Promise<Blob> {
 
     const trimmed = line.trim()
 
-    // 1. DETECT NAME (first line - always centered, large, bold)
+    // 1. DETECT NAME (first line - centered, large, bold, BLACK)
     if (isFirstLine && trimmed.length > 0 && trimmed.length < 50) {
       pdf.setFontSize(20)
       pdf.setFont('helvetica', 'bold')
@@ -66,7 +71,7 @@ export async function generatePDF(data: ResumeData): Promise<Blob> {
       return
     }
 
-    // 2. DETECT CONTACT LINE (second line - centered, smaller, gray)
+    // 2. DETECT CONTACT LINE (second line - centered, smaller, BLACK)
     if (index === 1 && trimmed.includes('|')) {
       pdf.setFontSize(9)
       pdf.setFont('helvetica', 'normal')
@@ -76,7 +81,7 @@ export async function generatePDF(data: ResumeData): Promise<Blob> {
       const centerX = (pageWidth - textWidth) / 2
       pdf.text(trimmed, centerX, y)
       
-      // Add horizontal line under header
+      // Add horizontal line under header (BLACK)
       pdf.setDrawColor(colors.primary[0], colors.primary[1], colors.primary[2])
       pdf.setLineWidth(0.5)
       pdf.line(leftMargin, y + 3, pageWidth - leftMargin, y + 3)
@@ -100,7 +105,7 @@ export async function generatePDF(data: ResumeData): Promise<Blob> {
       pdf.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2])
       pdf.text(trimmed, leftMargin, y)
       
-      // Underline section headers
+      // Underline section headers (BLACK)
       const headerWidth = pdf.getTextWidth(trimmed)
       pdf.setDrawColor(colors.primary[0], colors.primary[1], colors.primary[2])
       pdf.setLineWidth(0.3)
@@ -184,14 +189,16 @@ export async function generatePDF(data: ResumeData): Promise<Blob> {
 
 /**
  * Generate DOCX from resume text
+ * Using Calibri font with all black text
  */
 export async function generateDOCX(data: ResumeData): Promise<Blob> {
   const { content, template } = data
 
-  // Template-specific colors (hex)
-  const colors = template === 'template_1'
-    ? { primary: '19376D', secondary: '505050' }  // Navy
-    : { primary: '2980B9', secondary: '34495E' }  // Modern blue
+  // All text should be BLACK
+  const colors = {
+    primary: '000000',   // Black for headers
+    secondary: '000000', // Black for subheaders
+  }
 
   const lines = content.split('\n')
   const paragraphs: Paragraph[] = []
@@ -206,7 +213,7 @@ export async function generateDOCX(data: ResumeData): Promise<Blob> {
 
     const trimmed = line.trim()
 
-    // 1. NAME (first line - centered, large, bold, colored)
+    // 1. NAME (first line - centered, large, bold, BLACK, Calibri)
     if (isFirstLine && trimmed.length > 0 && trimmed.length < 50) {
       paragraphs.push(
         new Paragraph({
@@ -216,6 +223,7 @@ export async function generateDOCX(data: ResumeData): Promise<Blob> {
               bold: true,
               size: 36, // 18pt
               color: colors.primary,
+              font: 'Calibri',
             }),
           ],
           alignment: AlignmentType.CENTER,
@@ -226,7 +234,7 @@ export async function generateDOCX(data: ResumeData): Promise<Blob> {
       return
     }
 
-    // 2. CONTACT LINE (second line - centered, gray)
+    // 2. CONTACT LINE (second line - centered, BLACK, Calibri)
     if (index === 1 && trimmed.includes('|')) {
       paragraphs.push(
         new Paragraph({
@@ -235,6 +243,7 @@ export async function generateDOCX(data: ResumeData): Promise<Blob> {
               text: trimmed,
               size: 20, // 10pt
               color: colors.secondary,
+              font: 'Calibri',
             }),
           ],
           alignment: AlignmentType.CENTER,
@@ -252,7 +261,7 @@ export async function generateDOCX(data: ResumeData): Promise<Blob> {
       return
     }
 
-    // 3. SECTION HEADERS (ALL CAPS)
+    // 3. SECTION HEADERS (ALL CAPS - BLACK, bold, Calibri)
     const isHeader = trimmed === trimmed.toUpperCase() && 
                      trimmed.length > 2 && 
                      trimmed.length < 60 &&
@@ -269,6 +278,7 @@ export async function generateDOCX(data: ResumeData): Promise<Blob> {
               bold: true,
               size: 26, // 13pt
               color: colors.primary,
+              font: 'Calibri',
             }),
           ],
           spacing: { before: 240, after: 120 },
@@ -285,7 +295,7 @@ export async function generateDOCX(data: ResumeData): Promise<Blob> {
       return
     }
 
-    // 4. SUBHEADERS (job titles, companies)
+    // 4. SUBHEADERS (job titles, companies - BLACK, bold, Calibri)
     const isSubheader = (
       (trimmed.includes('|') && !trimmed.includes('@')) ||
       (trimmed.startsWith('(') && trimmed.includes(')'))
@@ -300,6 +310,7 @@ export async function generateDOCX(data: ResumeData): Promise<Blob> {
               bold: true,
               size: 22, // 11pt
               color: colors.secondary,
+              font: 'Calibri',
             }),
           ],
           spacing: { before: 120, after: 60 },
@@ -308,7 +319,7 @@ export async function generateDOCX(data: ResumeData): Promise<Blob> {
       return
     }
 
-    // 5. BULLET POINTS
+    // 5. BULLET POINTS (BLACK, normal, Calibri)
     const isBullet = trimmed.startsWith('•') || trimmed.startsWith('-')
 
     if (isBullet) {
@@ -319,6 +330,7 @@ export async function generateDOCX(data: ResumeData): Promise<Blob> {
             new TextRun({
               text: bulletText,
               size: 22,
+              font: 'Calibri',
             }),
           ],
           bullet: { level: 0 },
@@ -329,13 +341,14 @@ export async function generateDOCX(data: ResumeData): Promise<Blob> {
       return
     }
 
-    // 6. REGULAR TEXT
+    // 6. REGULAR TEXT (BLACK, normal, Calibri)
     paragraphs.push(
       new Paragraph({
         children: [
           new TextRun({
             text: trimmed,
             size: 22,
+            font: 'Calibri',
           }),
         ],
         spacing: { before: 100, after: 100 },
