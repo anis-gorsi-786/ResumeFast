@@ -11,7 +11,7 @@ export function FeedbackWidget() {
     return (
       <button
         onClick={() => setIsMinimized(false)}
-        className="fixed bottom-24 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-all hover:scale-110"
+        className="fixed bottom-24 right-6 z-[60] bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-all hover:scale-110"
         aria-label="Send Feedback"
       >
         <MessageSquare className="h-6 w-6" />
@@ -20,7 +20,7 @@ export function FeedbackWidget() {
   }
 
   return (
-    <div className="fixed bottom-24 right-6 z-50 bg-white rounded-lg shadow-xl border-2 border-blue-400 p-4 max-w-sm">
+    <div className="fixed bottom-24 right-6 z-[60] bg-white rounded-lg shadow-xl border-2 border-blue-400 p-4 max-w-sm">
       <button
         onClick={() => setIsMinimized(true)}
         className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
