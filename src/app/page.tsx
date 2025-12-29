@@ -60,15 +60,15 @@ export default function HomePage() {
           <div className="flex items-center justify-center gap-8 text-sm text-gray-600">
             <div className="flex items-center gap-2">
               <Check className="h-5 w-5 text-green-600" />
-              <span>No signup required to try</span>
+              <span>Free to use</span>
             </div>
             <div className="flex items-center gap-2">
               <Check className="h-5 w-5 text-green-600" />
-              <span>Free forever plan</span>
+             <span>No credit card required</span>
             </div>
             <div className="flex items-center gap-2">
               <Check className="h-5 w-5 text-green-600" />
-              <span>Cancel anytime</span>
+              <span>Unlimited resumes</span>
             </div>
           </div>
         </div>
@@ -167,7 +167,7 @@ export default function HomePage() {
               {
                 step: '3',
                 title: 'Review & Customize',
-                description: 'See before/after changes. Accept, reject, or tweak. You\'re in control.',
+                description: 'See before/after changes. Accept, reject, or tweak. You\'re in control. Not Implemented yet!! for now you can See your ATS score improvement.',
                 icon: '✏️',
               },
               {
