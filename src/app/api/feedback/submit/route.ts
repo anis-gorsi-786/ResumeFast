@@ -72,7 +72,7 @@ Sent from Applya Feedback Form
         `.trim()
 
         const { data, error } = await resend.emails.send({
-          from: 'Applya <onboarding@resend.dev>',
+          from: 'Applya Feedback <anisgorsi@tutamail.com>',
           to: ['mohammed@mindflow.agency'],
           subject: emailSubject,
           html: emailHtml,
