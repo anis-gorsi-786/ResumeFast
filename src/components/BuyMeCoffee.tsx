@@ -43,7 +43,6 @@ export function BuyMeCoffee() {
         href="https://buymeacoffee.com/applya.io"
         target="_blank"
         rel="noopener noreferrer"
-        className="block w-full"
       >
         <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-white">
           <Coffee className="h-4 w-4 mr-2" />
