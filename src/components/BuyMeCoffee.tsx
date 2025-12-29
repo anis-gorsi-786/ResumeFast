@@ -39,20 +39,22 @@ export function BuyMeCoffee() {
         </div>
       </div>
 
-      
-        href="https://buymeacoffee.com/applya.io"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-white">
-          <Coffee className="h-4 w-4 mr-2" />
-          Buy Me a Coffee
-        </Button>
-      </a>
+      <div className="space-y-2">
+        
+          href="https://buymeacoffee.com/applya.io"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-white">
+            <Coffee className="h-4 w-4 mr-2" />
+            Buy Me a Coffee
+          </Button>
+        </a>
 
-      <p className="text-xs text-gray-500 text-center mt-2">
-        Your support helps keep Applya free!
-      </p>
+        <p className="text-xs text-gray-500 text-center">
+          Your support helps keep Applya free!
+        </p>
+      </div>
     </div>
   )
 }
