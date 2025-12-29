@@ -1,16 +1,32 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Coffee, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export function BuyMeCoffee() {
   const [isMinimized, setIsMinimized] = useState(false)
 
+  // Listen for feedback widget opening
+  useEffect(() => {
+    const handleFeedbackOpen = () => {
+      setIsMinimized(true)
+    }
+
+    window.addEventListener('feedbackWidgetOpened', handleFeedbackOpen)
+    return () => window.removeEventListener('feedbackWidgetOpened', handleFeedbackOpen)
+  }, [])
+
+  const handleOpen = () => {
+    setIsMinimized(false)
+    // Tell feedback widget to close
+    window.dispatchEvent(new Event('coffeeWidgetOpened'))
+  }
+
   if (isMinimized) {
     return (
       <button
-        onClick={() => setIsMinimized(false)}
+        onClick={handleOpen}
         className="fixed bottom-6 right-6 z-50 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full p-4 shadow-lg transition-all hover:scale-110"
         aria-label="Support Us"
       >
@@ -40,11 +56,11 @@ export function BuyMeCoffee() {
       </div>
 
       
-    <a href="https://buymeacoffee.com/applya.io"
+     <a href="https://buymeacoffee.com/applya.io"
         target="_blank"
         rel="noopener noreferrer"
-        className="block mb-2">
-          
+        className="block mb-2"
+      >
         <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-white">
           <Coffee className="h-4 w-4 mr-2" />
           Buy Me a Coffee

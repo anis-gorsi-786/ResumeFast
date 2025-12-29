@@ -1,16 +1,32 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { MessageSquare, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export function FeedbackWidget() {
   const [isMinimized, setIsMinimized] = useState(true)
 
+  // Listen for coffee widget opening
+  useEffect(() => {
+    const handleCoffeeOpen = () => {
+      setIsMinimized(true)
+    }
+
+    window.addEventListener('coffeeWidgetOpened', handleCoffeeOpen)
+    return () => window.removeEventListener('coffeeWidgetOpened', handleCoffeeOpen)
+  }, [])
+
+  const handleOpen = () => {
+    setIsMinimized(false)
+    // Tell coffee widget to close
+    window.dispatchEvent(new Event('feedbackWidgetOpened'))
+  }
+
   if (isMinimized) {
     return (
       <button
-        onClick={() => setIsMinimized(false)}
+        onClick={handleOpen}
         className="fixed bottom-24 right-6 z-[60] bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-all hover:scale-110"
         aria-label="Send Feedback"
       >
