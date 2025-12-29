@@ -1,4 +1,5 @@
 import OpenAI from 'openai'
+import { getTemplateSkeleton } from '@/lib/templates/skeletons'
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error('Missing OPENAI_API_KEY environment variable')
@@ -38,9 +39,9 @@ export async function generateCustomizedResume(
   const originalAtsScore = Math.round((originalMatchedKeywords.length / keywords.length) * 100)
 
   // Build locked sections instruction
-let lockedSectionsInstruction = ''
-if (lockedSections.length > 0) {
-  lockedSectionsInstruction = `\n\n━━━ CRITICAL - LOCKED SECTIONS - DO NOT MODIFY ━━━
+  let lockedSectionsInstruction = ''
+  if (lockedSections.length > 0) {
+    lockedSectionsInstruction = `\n\n━━━ CRITICAL - LOCKED SECTIONS - DO NOT MODIFY ━━━
 The following sections are LOCKED. You MUST copy them EXACTLY word-for-word from the base resume:
 
 ${lockedSections.map(s => `🔒 ${s}`).join('\n')}
@@ -62,102 +63,49 @@ RULES FOR UNLOCKED SECTIONS:
 
 VERIFICATION STEP (REQUIRED):
 Before returning the final resume, verify that each locked section appears EXACTLY as written in the base resume. If you changed even one word, you FAILED.`
-}
+  }
 
-  // Build the prompt
-const systemPrompt = `You are an expert resume writer specializing in ATS-optimized resumes. 
-Your PRIMARY GOAL is to maximize keyword matching while maintaining truthfulness.
+  // Get the template skeleton
+  const templateSkeleton = getTemplateSkeleton(template)
 
-TEMPLATE FORMAT - CRITICAL - MUST FOLLOW EXACTLY:
-${template === 'template_1' ? `
-FIRST NAME LAST NAME
-City, State | Phone: +61 XXX XXX XXX | Email: email@email.com | LinkedIn: linkedin.com/in/username
+  const systemPrompt = `You are an expert resume writer specializing in ATS-optimized resumes.
 
-PROFESSIONAL SUMMARY
-[2-3 sentences maximum - focus on role relevance]
+YOUR TASK:
+You will receive a TEMPLATE with [PLACEHOLDERS] and a BASE RESUME with content.
+You must fill in the placeholders with content from the base resume, optimized for the job description.
 
-EDUCATION
-Bachelor of [Degree] ([Specialization])
-University Name | Year - Year
-- Achievement or relevant coursework
+TEMPLATE TO USE (COPY THIS EXACT STRUCTURE):
+${templateSkeleton}
 
-PROFESSIONAL EXPERIENCE
-Job Title
-Company Name | Location | Month YYYY - Present
-- Key responsibility starting with action verb
-- Quantified achievement with impact
-- Another relevant accomplishment
-- Technical implementation or improvement
-
-TECHNICAL SKILLS
-Category: Skill, Skill, Skill
-Category: Skill, Skill, Skill
-
-VOLUNTEERING & MEMBERSHIPS
-- Role - Organization | Year
-` : `
-FIRST NAME LAST NAME
-City, State | Phone: +61 XXX XXX XXX | Email: email@email.com | LinkedIn: linkedin.com/in/username
-
-PROFESSIONAL PROFILE
-[2-3 sentences showing dedication and expertise relevant to the role]
-
-KEY CAPABILITIES
-- Skill area: Brief explanation of capability and strength
-- Technical expertise: Description of proficiency
-- Problem-solving: Summary of approach and results
-- Stakeholder management: How you deliver outcomes
-
-CAREER SUMMARY
-(Job Title) - Company Name | Location | Year - Year
-
-QUALIFICATION
-- Degree Name
-
-PROFESSIONAL DEVELOPMENT
-- Certification Name | Organization | Year
-
-RECENT PROFESSIONAL EXPERIENCE
-(Job Title)
-Company Name | Location | Month YYYY - Present
-- Comprehensive responsibility: Detailed description of primary duty
-- Achievement with context: Specific example of success and its impact
-- Problem resolution: How you addressed challenges or implemented solutions
-- Process improvement: Efficiency gain or workflow enhancement
-- Stakeholder communication: How you interact with clients or team members
-- Technical competency: Demonstration of relevant technical skills
-
-REFERENCES
-Available upon request
-`}
-
-CRITICAL FORMATTING REQUIREMENTS:
-1. Headers MUST be ALL CAPS with no other formatting
-2. NO asterisks (*), NO markdown (**), NO special characters
-3. Bullet points use "•" character ONLY
-4. Each section MUST appear in order shown above
-5. Job titles in parentheses for Template 2: (Service Desk Officer)
-6. Dates format: Month YYYY - Present OR Month YYYY - Month YYYY
-7. Keep exact spacing: blank line between sections
-8. Contact line uses " | " (space pipe space) as separator
+CRITICAL RULES:
+1. COPY the template structure EXACTLY - every line, every space, every format
+2. REPLACE [PLACEHOLDERS] with actual content from the base resume
+3. DO NOT add extra lines, sections, or formatting
+4. DO NOT use asterisks (*), markdown (**), or special characters
+5. Use "•" for bullet points (already in template)
+6. Headers are already in ALL CAPS (keep them)
+7. If base resume has more jobs than template slots, include the most relevant ones
+8. If base resume has fewer items, leave those placeholder sections out
 
 ${lockedSectionsInstruction}
 
-KEYWORD OPTIMIZATION STRATEGY (for unlocked sections only):
-- Incorporate ALL missing keywords naturally
-- Reword achievements to include target keywords
-- Use exact terminology from job description
-- Include keyword variations
-- Emphasize relevant experiences
+PLACEHOLDER FILLING STRATEGY:
+- [FIRST_NAME] [LAST_NAME]: Extract from base resume
+- [PROFESSIONAL_SUMMARY_PARAGRAPH]: Write 2-3 sentences targeting the job, incorporating keywords
+- [JOB_TITLE_1], [COMPANY_NAME_1], etc.: Copy exactly from base resume
+- [RESPONSIBILITY_1], [RESPONSIBILITY_2], etc.: Rewrite base resume bullets to include job keywords
+- [SKILL_CATEGORY_1]: Group related skills (e.g., "Systems & Administration", "Programming")
+- [SKILLS_LIST_1]: Comma-separated list of relevant skills
 
-FORBIDDEN:
-- Do NOT deviate from template structure
-- Do NOT add or remove sections from template
-- Do NOT use asterisks, markdown, or special formatting
-- Do NOT modify locked sections
-- Do NOT fabricate information
+KEYWORD OPTIMIZATION:
+- Incorporate missing keywords naturally into responsibilities
+- Update professional summary/profile with key terms
+- Emphasize transferable skills matching job requirements
+- Use exact phrases from job description when possible
 
-TARGET: Achieve 80%+ keyword match while maintaining resume authenticity and following template structure exactly.`
+OUTPUT FORMAT:
+Return ONLY the filled template - no explanations, no preambles, no markdown code blocks.
+The output should look exactly like the template structure above, just with placeholders replaced.`
 
   const userPrompt = `BASE RESUME:
 ${baseResume}
@@ -167,30 +115,26 @@ ${jobDescription}
 
 ${customRequests ? `CUSTOM REQUESTS:\n${customRequests}\n` : ''}
 
-KEY REQUIREMENTS FROM JOB:
-${keywords.join(', ')}
+KEYWORD ANALYSIS:
+- Total Keywords: ${keywords.length}
+- Currently Matched: ${originalMatchedKeywords.length} (${originalAtsScore}%)
+- Missing Keywords: ${keywords.filter(k => !originalMatchedKeywords.includes(k)).join(', ')}
+- Target Score: 80%+
 
-CURRENT KEYWORD MATCH: ${originalAtsScore}% (${originalMatchedKeywords.length}/${keywords.length} keywords)
-TARGET MATCH: 80%+ 
+INSTRUCTIONS:
+1. Take the TEMPLATE structure from the system prompt
+2. Fill in EVERY placeholder using content from the BASE RESUME above
+3. Optimize bullets and summary to include MISSING KEYWORDS
+4. Ensure the output matches the template format EXACTLY
+5. Return ONLY the completed resume - no other text
 
-MISSING KEYWORDS TO INCORPORATE:
-${keywords.filter(k => !originalMatchedKeywords.includes(k)).join(', ')}
+${lockedSections.length > 0 ? `
+LOCKED SECTIONS REMINDER:
+For these sections, copy content EXACTLY from base resume:
+${lockedSections.map(s => `- ${s}`).join('\n')}
+` : ''}
 
-OPTIMIZATION PRIORITY:
-1. Include EVERY relevant keyword from the missing list above
-2. Rewrite experience bullets to naturally include these terms
-3. Update the professional summary to include key technical terms
-4. Emphasize transferable skills that match the requirements
-5. Use exact keyword phrases when possible (e.g., "IT Service Level Agreement" not "SLA")
-
-Please generate a customized version of this resume that:
-1. Emphasizes relevant experience for this specific role
-2. Incorporates keywords from the job description naturally
-3. Reorders sections to highlight most relevant qualifications first
-4. Maintains all factual accuracy
-5. Uses the ${template === 'template_1' ? 'Clean Professional' : 'Modern Executive'} format
-
-Return ONLY the customized resume text, no explanations or meta-commentary.`
+Begin generating the resume now.`
 
   try {
     const completion = await openai.chat.completions.create({

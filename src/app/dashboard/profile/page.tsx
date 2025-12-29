@@ -13,7 +13,7 @@ import { SectionLock } from '@/components/profile/SectionLock'
 
 export default function ProfilePage() {
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState('details')
+  const [activeTab, setActiveTab] = useState('resume')
   const [loading, setLoading] = useState(true)
   
   // Personal details
@@ -161,7 +161,7 @@ export default function ProfilePage() {
             <TabsTrigger value="template">Choose Template</TabsTrigger>
             <TabsTrigger value="locks">Lock Sections</TabsTrigger>
           </TabsList>
-          
+
           {/* Resume Upload Tab */}
           <TabsContent value="resume">
             <Card>
