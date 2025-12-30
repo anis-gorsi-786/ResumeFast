@@ -28,7 +28,6 @@ export async function POST(request: Request) {
     const { data, error } = await resend.emails.send({
       from: 'Applya Feedback <onboarding@resend.dev>',
       to: ['anisgorsi@tutamail.com'],  // Your Resend signup email
-      bcc: ['mohammed@mindflow.agency'],
       replyTo: email || undefined,  // If user provided email, set as reply-to
       subject: `Applya Feedback: ${feedbackType}`,
       html: `
