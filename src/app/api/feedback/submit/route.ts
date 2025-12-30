@@ -4,7 +4,6 @@ export async function POST(request: Request) {
   try {
     const { feedbackType, name, email, message } = await request.json()
 
-    // Validate
     if (!message || message.trim().length === 0) {
       return NextResponse.json(
         { error: 'Message is required' },
@@ -12,20 +11,25 @@ export async function POST(request: Request) {
       )
     }
 
-    console.log('📧 Sending feedback email...')
-    console.log('API Key present:', !!process.env.RESEND_API_KEY)
+    if (!process.env.RESEND_API_KEY) {
+      console.error('❌ RESEND_API_KEY is not set')
+      return NextResponse.json(
+        { error: 'Email service not configured' },
+        { status: 500 }
+      )
+    }
 
-    // Import and initialize Resend INSIDE the function
+    console.log('📧 Sending feedback email...')
+
     const { Resend } = await import('resend')
     const resend = new Resend(process.env.RESEND_API_KEY)
 
-    console.log('From:', 'anisgorsi@tutamail.com')
-    console.log('To:', 'mohammed@mindflow.agency')
-
-    // Send email using Resend
+    // Using Resend's test domain (allowed by default)
     const { data, error } = await resend.emails.send({
-      from: 'Applya Feedback <anisgorsi@tutamail.com>',
-      to: ['mohammed@mindflow.agency'],
+      from: 'Applya Feedback <onboarding@resend.dev>',
+      to: ['anisgorsi@tutamail.com'],  // Your Resend signup email
+      bcc: ['mohammed@mindflow.agency'],
+      replyTo: email || undefined,  // If user provided email, set as reply-to
       subject: `Applya Feedback: ${feedbackType}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -37,6 +41,7 @@ export async function POST(request: Request) {
             <p><strong>Type:</strong> ${feedbackType}</p>
             <p><strong>From:</strong> ${name || 'Anonymous'}</p>
             <p><strong>Email:</strong> ${email || 'Not provided'}</p>
+            <p><strong>Forward to:</strong> mohammed@mindflow.agency</p>
           </div>
           
           <div style="background: white; padding: 20px; border-left: 4px solid #3b82f6; margin: 20px 0;">
@@ -47,7 +52,8 @@ export async function POST(request: Request) {
           <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
           
           <p style="color: #9ca3af; font-size: 12px; text-align: center;">
-            Sent from Applya Feedback Form
+            Sent from Applya Feedback Form<br>
+            Please forward this to mohammed@mindflow.agency
           </p>
         </div>
       `,
@@ -55,16 +61,25 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error('❌ Resend error:', JSON.stringify(error, null, 2))
-      return NextResponse.json({ error }, { status: 500 })
+      return NextResponse.json(
+        { error: error.message || 'Failed to send email' },
+        { status: 500 }
+      )
     }
 
     console.log('✅ Email sent successfully!')
     console.log('Email ID:', data?.id)
 
-    return NextResponse.json(data)
+    return NextResponse.json({ 
+      message: 'Feedback sent successfully',
+      emailId: data?.id 
+    })
     
   } catch (error: any) {
-    console.error('❌ Feedback submission error:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error('❌ Error:', error)
+    return NextResponse.json(
+      { error: error.message || 'Failed to submit feedback' },
+      { status: 500 }
+    )
   }
 }
